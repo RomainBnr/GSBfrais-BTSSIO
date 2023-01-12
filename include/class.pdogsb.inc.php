@@ -17,9 +17,9 @@
 
 class PdoGsb{   		
       	private static $serveur='mysql:host=localhost';
-      	private static $bdd='dbname=gsb_frais';   		
-      	private static $user='gsb_user' ;    		
-      	private static $mdp='password' ;	
+      	private static $bdd='dbname=GSB-frais';   		
+      	private static $user='admin' ;    		
+      	private static $mdp='simone' ;	
 		private static $monPdo;
 		private static $monPdoGsb=null;
 /**
@@ -60,6 +60,38 @@ class PdoGsb{
 		$ligne = $rs->fetch();
 		return $ligne;
 	}
+
+	// Connexion daf
+/**
+ * Retourne les informations d'un visiteur
+ 
+ * @param $login 
+ * @param $mdp
+ * @return l'id, le nom et le prénom sous la forme d'un tableau associatif 
+*/
+public function getInfosDaf($login, $mdp){
+	$req = "select DAF.id as id, DAF.nom as nom, DAF.prenom as prenom from DAF 
+	where DAF.login='$login' and DAF.mdp='$mdp'";
+	$rs = PdoGsb::$monPdo->query($req);
+	$ligne = $rs->fetch();
+	return $ligne;
+}
+
+// Afficher daf
+public function getinfosficheF(){
+	$req = "select idFiche as id, nom as nom, prenom as prenom, mois as mois,
+	nbJustificatifs as  nbJustificatifs, montantValide as montant, dateModif as dateModif,
+	libelle as etat from FicheFrais as F INNER JOIN Visiteur as V on F.idVisiteur = V.id INNER JOIN Etat as E ON F.idEtat = E.id";
+	$rs = PdoGsb::$monPdo->query($req);
+	$ligne = $rs->fetchAll();
+	return $ligne;
+}
+
+public function changeEtat($idFiche,$etat){
+	$req = "update FicheFrais set idEtat = '$etat' 
+		where FicheFrais.idFiche = '$idFiche'";
+		PdoGsb::$monPdo->exec($req);
+}
 
 /**
  * Retourne sous forme d'un tableau associatif toutes les lignes de frais hors forfait
@@ -231,8 +263,8 @@ class PdoGsb{
 */
 	public function creeNouveauFraisHorsForfait($idVisiteur,$mois,$libelle,$date,$montant){
 		$dateFr = dateFrancaisVersAnglais($date);
-		$req = "insert into LigneFraisHorsForfait 
-		values('','$idVisiteur','$mois','$libelle','$dateFr','$montant')";
+		$req = "insert into LigneFraisHorsForfait(idVisiteur,mois,libelle,date,montant)
+		values('$idVisiteur','$mois','$libelle','$dateFr','$montant')";
 		PdoGsb::$monPdo->exec($req);
 	}
 /**
