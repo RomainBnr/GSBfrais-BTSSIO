@@ -26,7 +26,7 @@ switch($action){
 		}
 		break;
 	}
-	case'deconnexion':{
+	case 'deconnexion':{
 		deconnecter();
 	}
 	default :{
@@ -34,4 +34,3 @@ switch($action){
 		break;
 	}
 }
-?>

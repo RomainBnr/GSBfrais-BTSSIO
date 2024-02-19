@@ -11,16 +11,16 @@ switch($action){
 	case 'valideConnexion':{
 		$login = $_REQUEST['login'];
 		$mdp = $_REQUEST['mdp'];
-		$DAF = $pdo->getInfosDaf($login,$mdp);
-		if(!is_array( $DAF)){
+		$daf = $pdo->getInfosDAF($login,$mdp);
+		if(!is_array($daf)){
 			ajouterErreur("Login ou mot de passe incorrect");
 			include("vues/v_erreurs.php");
 			include("vues/v_daf.php");
 		}
 		else{
-			$id = $DAF['id'];
-			$nom =  $DAF['nom'];
-			$prenom = $DAF['prenom'];
+			$id = $daf['id'];
+			$nom =  $daf['nom'];
+			$prenom = $daf['prenom'];
 			connecter($id,$nom,$prenom);
 			include("vues/v_admin.php");
 		}
@@ -31,4 +31,3 @@ switch($action){
 		break;
 	}
 }
-?>

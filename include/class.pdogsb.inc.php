@@ -15,11 +15,11 @@
  * @link       http://www.php.net/manual/fr/book.pdo.php
  */
 
-class PdoGsb{   		
+class PdoGsb{
       	private static $serveur='mysql:host=localhost';
-      	private static $bdd='dbname=GSB-frais';   		
-      	private static $user='admin' ;    		
-      	private static $mdp='simone' ;	
+      	private static $bdd='dbname=gsb';   		
+      	private static $user='test' ;    		
+      	private static $mdp='d76J!LdkCxTXT#3#' ;	
 		private static $monPdo;
 		private static $monPdoGsb=null;
 /**
@@ -61,37 +61,133 @@ class PdoGsb{
 		return $ligne;
 	}
 
-	// Connexion daf
 /**
- * Retourne les informations d'un visiteur
+ * Retourne les informations du DAF
  
  * @param $login 
  * @param $mdp
  * @return l'id, le nom et le prénom sous la forme d'un tableau associatif 
 */
-public function getInfosDaf($login, $mdp){
-	$req = "select DAF.id as id, DAF.nom as nom, DAF.prenom as prenom from DAF 
-	where DAF.login='$login' and DAF.mdp='$mdp'";
-	$rs = PdoGsb::$monPdo->query($req);
-	$ligne = $rs->fetch();
-	return $ligne;
-}
+	public function getInfosDAF($login, $mdp){
+		$req = "select DAF.id as id, DAF.nom as nom, DAF.prenom as prenom from DAF 
+		where DAF.login='$login' and DAF.mdp='$mdp'";
+		$rs = PdoGsb::$monPdo->query($req);
+		$ligne = $rs->fetch();
+		return $ligne;
+	}
 
-// Afficher daf
-public function getinfosficheF(){
-	$req = "select idFiche as id, nom as nom, prenom as prenom, mois as mois,
-	nbJustificatifs as  nbJustificatifs, montantValide as montant, dateModif as dateModif,
-	libelle as etat from FicheFrais as F INNER JOIN Visiteur as V on F.idVisiteur = V.id INNER JOIN Etat as E ON F.idEtat = E.id";
-	$rs = PdoGsb::$monPdo->query($req);
-	$ligne = $rs->fetchAll();
-	return $ligne;
-}
+/**
+ * Retourne les fiches de frais
+ 
+ * @return un tableau associatif 
+*/
+	public function getFiches(){
+		$req = "select idFiche as id, nom as nom, prenom as prenom, mois as mois, 
+		nbJustificatifs as nbJustificatifs, montantValide as montant, dateModif as dateModif, 
+		libelle as etat from FicheFrais as F INNER JOIN Visiteur as V ON F.idVisiteur = V.id 
+		INNER JOIN Etat as E ON F.idEtat = E.id order by nom, mois desc";
+		$rs = PdoGsb::$monPdo->query($req);
+		$ligne = $rs->fetchAll();
+		return $ligne;
+	}
 
-public function changeEtat($idFiche,$etat){
-	$req = "update FicheFrais set idEtat = '$etat' 
+/**
+ * Retourne les etats
+ 
+ * @return un tableau associatif 
+*/
+	public function getEtat(){
+		$req = "select libelle as libelle, id as id from Etat";
+		$rs = PdoGsb::$monPdo->query($req);
+		$ligne = $rs->fetchAll();
+		return $ligne;
+	}
+	
+/**
+ * met à jour l'etat d'une fiche
+ * pour la fiche concerné concerné
+ 
+ * @param $idFiche 
+ * @param $etat
+*/
+	public function changeEtat($idFiche, $etat){
+		$req = "update FicheFrais set idEtat = '$etat' 
 		where FicheFrais.idFiche = '$idFiche'";
 		PdoGsb::$monPdo->exec($req);
-}
+	}
+
+/**
+ * met à jour le libelle d'un etat
+ * pour l'id concerné
+ 
+ * @param $id 
+ * @param $lib
+*/
+	public function changeLib($id, $lib){
+		$req = "update Etat set libelle = '$lib' 
+		where Etat.id = '$id'";
+		PdoGsb::$monPdo->exec($req);
+	}
+
+/**
+ * met à jour le libelle d'un mode de paiement
+ * pour l'id concerné
+ 
+ * @param $id 
+ * @param $lib
+*/
+	public function changeLibPaiement($id, $lib){
+		$req = "update ModePaiement set libelle = '$lib' 
+		where ModePaiement.id = '$id'";
+		PdoGsb::$monPdo->exec($req);
+	}
+
+/**
+ * supprime un mode de paiement
+ * pour l'id concerné
+ 
+ * @param $id 
+*/
+	public function deletePaiement($id){
+		$req = "delete from ModePaiement 
+		where ModePaiement.id = '$id'";
+		PdoGsb::$monPdo->exec($req);
+	}
+
+/**
+ * ajouter un mode de paiement
+
+ * @param $lib
+*/
+	public function addPaiement($lib){
+		$req = "insert into ModePaiement(libelle)
+		values('$lib')";
+		PdoGsb::$monPdo->exec($req);
+	}
+
+/**
+ * ajouter un mode de paiement
+
+ * @param $id
+*/
+	public function checkPaiement($id){
+		$req = "select count(*) as ligne from LigneFraisHorsForfait where LigneFraisHorsForfait.paiement = '$id'";
+		$rs = PdoGsb::$monPdo->query($req);
+		$ligne = $rs->fetch();
+		return $ligne;
+	}
+
+/**
+ * Retourne les modes de paiements
+ 
+ * @return un tableau associatif 
+*/
+	public function getPaiements() {
+		$req = "select libelle as libelle, id as id from ModePaiement";
+		$rs = PdoGsb::$monPdo->query($req);
+		$ligne = $rs->fetchAll();
+		return $ligne;
+	}
 
 /**
  * Retourne sous forme d'un tableau associatif toutes les lignes de frais hors forfait
@@ -105,8 +201,11 @@ public function changeEtat($idFiche,$etat){
  * @return tous les champs des lignes de frais hors forfait sous la forme d'un tableau associatif 
 */
 	public function getLesFraisHorsForfait($idVisiteur,$mois){
-	    $req = "select * from LigneFraisHorsForfait where LigneFraisHorsForfait.idVisiteur ='$idVisiteur' 
-		and LigneFraisHorsForfait.mois = '$mois' ";	
+	    $req = "select L.id as id, L.libelle as libelle, L.date as 'date', L.montant as montant, M.libelle as paiement 
+		from LigneFraisHorsForfait as L
+		inner join ModePaiement as M on L.paiement = M.id
+		where L.idVisiteur ='$idVisiteur' 
+		and L.mois = '$mois' ";	
 		$res = PdoGsb::$monPdo->query($req);
 		$lesLignes = $res->fetchAll();
 		$nbLignes = count($lesLignes);
@@ -261,10 +360,10 @@ public function changeEtat($idFiche,$etat){
  * @param $date : la date du frais au format français jj//mm/aaaa
  * @param $montant : le montant
 */
-	public function creeNouveauFraisHorsForfait($idVisiteur,$mois,$libelle,$date,$montant){
+	public function creeNouveauFraisHorsForfait($idVisiteur,$mois,$libelle,$date,$montant,$paiement){
 		$dateFr = dateFrancaisVersAnglais($date);
-		$req = "insert into LigneFraisHorsForfait(idVisiteur,mois,libelle,date,montant)
-		values('$idVisiteur','$mois','$libelle','$dateFr','$montant')";
+		$req = "insert into LigneFraisHorsForfait(idVisiteur,mois,libelle,date,montant,paiement) 
+		values('$idVisiteur','$mois','$libelle','$dateFr','$montant','$paiement')";
 		PdoGsb::$monPdo->exec($req);
 	}
 /**

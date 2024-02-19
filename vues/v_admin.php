@@ -1,30 +1,25 @@
-<!-- Division pour le sommaire -->
 <div id="menuGauche">
     <div id="infosUtil">
-
         <h2>
-
         </h2>
-
     </div>
     <ul id="menuList">
         <li>
-            Daf :<br>
-            <?php echo $_SESSION['prenom']."  ".$_SESSION['nom']  ?>
+            DAF :<br>
+            <?php echo $_SESSION['prenom'] . "  " . $_SESSION['nom']  ?>
         </li>
         <li class="smenu">
-            <a href="index.php?uc=ficheFrais" title="Saisie fiche de frais ">Saisie fiche de
-                frais</a>
+            <a href="index.php?uc=ficheFrais" title="Saisie fiche de frais ">Liste Fiches de Frais</a>
         </li>
-
+        <li class="smenu">
+            <a href="index.php?uc=libEtat" title="Saisie libelle etat ">Saisie libelle etat</a>
+        </li class="smenu">
+        <a href="index.php?uc=gestionPaiement" title="Gestion mode de paiement">Gestion paiements</a>
         <li>
-            
+
         </li>
-
-
         <li class="smenu">
             <a href="index.php?uc=connexion&action=deconnexion" title="Se déconnecter">Déconnexion</a>
         </li>
     </ul>
-
 </div>
